@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
-import { Crosshair, Flame, Gamepad2, Grid2X2, Joystick, Loader2, Puzzle, Search, Shield, ShieldCheck, Sparkles, Star, Swords, UsersRound, WandSparkles } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
+import { ArrowDownUp, Crosshair, Flame, Gamepad2, Joystick, Puzzle, Search, Shield, ShieldCheck, Sparkles, Star, Swords, UsersRound, WandSparkles } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StatusLine } from '../components/StatusLine.jsx';
 import { money } from '../lib/format.js';
-import { displayImageUrl, hideBrokenImage } from '../lib/images.js';
+import { displayImageUrl, hideBrokenImage, imageFrameClass } from '../lib/images.js';
 
 const categoryIcons = {
   All: Sparkles,
@@ -16,6 +16,13 @@ const categoryIcons = {
   Social: UsersRound
 };
 
+const sortOptions = [
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'price-asc', label: 'Price Low' },
+  { value: 'price-desc', label: 'Price High' },
+  { value: 'az', label: 'A-Z' }
+];
+
 function CategoryIcon({ category, size = 15 }) {
   const Icon = categoryIcons[category] || Joystick;
   return <Icon className="categoryIcon" size={size} aria-hidden="true" />;
@@ -23,17 +30,67 @@ function CategoryIcon({ category, size = 15 }) {
 
 export function Catalog({ games, loading, error }) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('All');
+  const [searchParams, setSearchParams] = useSearchParams();
   const categories = useMemo(() => ['All', ...Array.from(new Set(games.map((game) => game.category).filter(Boolean)))], [games]);
+  const categoryParam = searchParams.get('category') || 'All';
+  const category = categories.includes(categoryParam) ? categoryParam : 'All';
+  const query = searchParams.get('q') || '';
+  const sort = sortOptions.some((option) => option.value === searchParams.get('sort')) ? searchParams.get('sort') : 'popular';
+  const activeSort = sortOptions.find((option) => option.value === sort) || sortOptions[0];
+
+  function updateFilters(nextFilters) {
+    const next = new URLSearchParams(searchParams);
+    Object.entries(nextFilters).forEach(([key, value]) => {
+      if (!value || value === 'All' || value === 'popular') {
+        next.delete(key);
+      } else {
+        next.set(key, value);
+      }
+    });
+    setSearchParams(next);
+  }
+
+  function cycleSort() {
+    const currentIndex = sortOptions.findIndex((option) => option.value === sort);
+    const nextSort = sortOptions[(currentIndex + 1) % sortOptions.length];
+    updateFilters({ sort: nextSort.value });
+  }
+
   const filtered = useMemo(() => {
     const text = query.trim().toLowerCase();
-    return games.filter((game) => {
+    const results = games.filter((game) => {
       const matchesCategory = category === 'All' || game.category === category;
-      const matchesSearch = !text || [game.name, game.category, game.publisher].filter(Boolean).join(' ').toLowerCase().includes(text);
+      const searchable = [
+        game.name,
+        game.shortName,
+        game.category,
+        game.publisher,
+        game.currencyLabel,
+        game.description,
+        game.slug
+      ].filter(Boolean).join(' ').toLowerCase();
+      const matchesSearch = !text || searchable.includes(text);
       return matchesCategory && matchesSearch;
     });
-  }, [category, games, query]);
+    return [...results].sort((left, right) => {
+      if (sort === 'price-asc') {
+        const leftPrice = left.lowestPrice ?? Number.POSITIVE_INFINITY;
+        const rightPrice = right.lowestPrice ?? Number.POSITIVE_INFINITY;
+        if (!Number.isFinite(leftPrice) && !Number.isFinite(rightPrice)) return 0;
+        return leftPrice - rightPrice;
+      }
+      if (sort === 'price-desc') {
+        const leftPrice = left.lowestPrice ?? Number.NEGATIVE_INFINITY;
+        const rightPrice = right.lowestPrice ?? Number.NEGATIVE_INFINITY;
+        if (!Number.isFinite(leftPrice) && !Number.isFinite(rightPrice)) return 0;
+        return rightPrice - leftPrice;
+      }
+      if (sort === 'az') {
+        return (left.shortName || left.name || '').localeCompare(right.shortName || right.name || '');
+      }
+      return 0;
+    });
+  }, [category, games, query, sort]);
 
   return (
     <main className="catalogPage">
@@ -44,30 +101,29 @@ export function Catalog({ games, loading, error }) {
         </div>
         <label className="searchBox">
           <Search size={18} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search games..." />
+          <input value={query} onChange={(event) => updateFilters({ q: event.target.value })} placeholder="Search games..." />
         </label>
       </section>
 
       <div className="categoryStrip" aria-label="Game categories">
         {categories.map((item) => (
-          <button className={item === category ? 'active' : ''} key={item} onClick={() => setCategory(item)} type="button">
+          <button aria-pressed={item === category} className={item === category ? 'active' : ''} key={item} onClick={() => updateFilters({ category: item })} type="button">
             <CategoryIcon category={item} />
             {item}
           </button>
         ))}
       </div>
       <div className="catalogTools">
-        <span>Sort by: <strong>Most Popular</strong></span>
+        <span>Sort by: <strong>{activeSort.label}</strong></span>
         <span>{filtered.length} games</span>
-        <button type="button" aria-label="Grid view"><Grid2X2 size={18} /></button>
+        <button type="button" onClick={cycleSort} aria-label={`Change sort, currently ${activeSort.label}`}><ArrowDownUp size={18} /></button>
       </div>
 
-      {loading && <StatusLine icon={<Loader2 className="spin" />} text="Loading catalog" />}
       {error && <StatusLine tone="bad" icon={<ShieldCheck />} text={error} />}
       <div className="gameGrid">
         {filtered.map((game, index) => (
           <button className="gameCard" key={game._id || game.slug} onClick={() => navigate(`/games/${game.slug}`)} type="button">
-            <span className="gameImage">
+            <span className={`gameImage${imageFrameClass(game)}`}>
               {displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" onError={hideBrokenImage} /> : <Gamepad2 />}
               <em>{index === 0 ? 'HOT' : index === 1 ? 'NEW' : 'TOP'}</em>
               <i><Star size={13} /> {(4.9 - Math.min(index, 4) * 0.1).toFixed(1)}</i>

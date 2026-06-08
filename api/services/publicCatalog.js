@@ -57,7 +57,19 @@ export function compactPublicGame(game = {}) {
 function normalizeStorefront(settings) {
   return {
     currency: settings?.currency || 'USD',
-    slides: [],
+    slides: (settings?.slides || [])
+      .filter((slide) => slide.active !== false)
+      .sort((left, right) => Number(left.sortOrder || 0) - Number(right.sortOrder || 0))
+      .map((slide) => ({
+        id: String(slide._id || ''),
+        title: slide.title || '',
+        subtitle: slide.subtitle || '',
+        ctaLabel: slide.ctaLabel || 'Top Up Now',
+        imageUrl: slide.imageUrl || '',
+        gameSlug: slide.gameSlug || '',
+        active: slide.active !== false,
+        sortOrder: slide.sortOrder || 0
+      })),
     catalog: settings?.catalog || {
       featuredGameSlugs: [],
       featuredOnly: false,
@@ -81,7 +93,13 @@ export async function getPublicGames() {
 
   const counts = await Package.aggregate([
     { $match: { game: { $in: games.map((game) => game._id) }, ...packageAvailabilityFilter() } },
-    { $group: { _id: '$game', packageCount: { $sum: 1 }, lowestPrice: { $min: '$priceUsd' } } }
+    {
+      $group: {
+        _id: '$game',
+        packageCount: { $sum: 1 },
+        lowestPrice: { $min: '$priceUsd' }
+      }
+    }
   ]);
   const countMap = new Map(counts.map((item) => [String(item._id), item]));
   const payload = games.map((game) => {

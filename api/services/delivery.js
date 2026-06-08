@@ -32,7 +32,7 @@ export async function deliverPaidOrder(order) {
 
     if (result.status === 'completed') order.status = 'completed';
     if (result.status === 'failed') order.status = 'failed';
-    if (result.status === 'not_configured') order.status = 'paid';
+    if (result.status === 'not_configured') order.status = 'processing';
 
     await order.save();
 
@@ -45,7 +45,7 @@ export async function deliverPaidOrder(order) {
       await notifySystem(`Delivery failed for ${order.orderNo}: ${result.error || 'Provider rejected order'}`);
     }
   } catch (error) {
-    order.status = 'paid';
+    order.status = 'processing';
     order.delivery = {
       ...(order.delivery?.toObject?.() || order.delivery || {}),
       provider: 'g2bulk',

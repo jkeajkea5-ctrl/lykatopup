@@ -12,6 +12,7 @@
     "preview": "vite preview --config client/vite.config.js --host 0.0.0.0",
     "start": "node api/index.js",
     "sync:g2bulk-packages": "node tools/sync-g2bulk-packages.js",
+    "sync:finchup-prices": "node tools/sync-finchup-prices.js",
     "poll:g2bulk-deliveries": "node tools/poll-g2bulk-deliveries.js"
   },
   "dependencies": {

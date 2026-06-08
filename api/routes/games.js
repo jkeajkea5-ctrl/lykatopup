@@ -27,7 +27,13 @@ router.get(
       .lean();
     const counts = await Package.aggregate([
       { $match: { game: { $in: games.map((game) => game._id) }, ...packageAvailabilityFilter(includeDisabled) } },
-      { $group: { _id: '$game', packageCount: { $sum: 1 }, lowestPrice: { $min: '$priceUsd' } } }
+      {
+        $group: {
+          _id: '$game',
+          packageCount: { $sum: 1 },
+          lowestPrice: { $min: '$priceUsd' }
+        }
+      }
     ]);
     const countMap = new Map(counts.map((item) => [String(item._id), item]));
     const payload = games.map((game) => {

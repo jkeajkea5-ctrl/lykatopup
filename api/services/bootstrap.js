@@ -507,18 +507,18 @@ export async function ensureDefaultAdmin() {
         currency: 'USD',
         slides: [
           {
-            title: 'Soft pastel deals for fast game top-ups',
-            subtitle: 'Mobile Legends, Free Fire, PUBG Mobile, and more',
-            ctaLabel: 'Claim Now',
+            title: '\u1794\u1789\u17D2\u1785\u17BC\u179B\u1796\u17C1\u1787\u17D2\u179A Mobile Legends \u17A5\u17A1\u17BC\u179C',
+            subtitle: '\u178F\u1798\u17D2\u179B\u17C3\u179F\u1798\u179A\u1798\u17D2\u1799 \u179B\u17BF\u1793 \u179F\u17BB\u179C\u178F\u17D2\u178F\u17B7\u1797\u17B6\u1796',
+            ctaLabel: '\u1794\u1789\u17D2\u1785\u17BC\u179B\u17A5\u17A1\u17BC\u179C',
             gameSlug: 'mobile-legends',
             imageUrl: officialGameImages['mobile-legends'],
             active: true,
             sortOrder: 1
           },
           {
-            title: 'Lyka Topup flash picks',
-            subtitle: 'Fresh prices on selected games',
-            ctaLabel: 'View',
+            title: 'Free Fire \u178F\u1798\u17D2\u179B\u17C3\u1796\u17B7\u179F\u17C1\u179F',
+            subtitle: '\u1780\u1789\u17D2\u1785\u1794\u17CB\u17A0\u17D2\u1782\u17C1\u1798 \u179F\u1798\u17D2\u179A\u17B6\u1794\u17CB\u17A2\u17D2\u1793\u1780\u179B\u17C1\u1784',
+            ctaLabel: '\u1798\u17BE\u179B\u1780\u1789\u17D2\u1785\u1794\u17CB',
             gameSlug: 'free-fire',
             imageUrl: officialGameImages['free-fire'],
             active: true,

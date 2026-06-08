@@ -75,6 +75,16 @@ const packageUpdateBody = z.object({
   sortOrder: z.coerce.number().optional()
 });
 
+const slideSchema = z.object({
+  title: z.string().trim().min(1),
+  subtitle: z.string().trim().optional(),
+  ctaLabel: z.string().trim().optional(),
+  imageUrl: z.string().trim().min(1),
+  gameSlug: z.string().trim().optional(),
+  active: z.boolean().default(true),
+  sortOrder: z.coerce.number().default(0)
+});
+
 router.get(
   '/summary',
   asyncHandler(async (_req, res) => {
@@ -317,6 +327,36 @@ router.put(
     );
     clearCache('public:');
     res.json(settings.catalog);
+  })
+);
+
+router.put(
+  '/storefront/slides',
+  validate(
+    z.object({
+      params: z.object({}).passthrough(),
+      query: z.object({}).passthrough(),
+      body: z.object({
+        slides: z.array(slideSchema).max(8)
+      })
+    })
+  ),
+  asyncHandler(async (req, res) => {
+    const settings = await SystemSetting.findOneAndUpdate(
+      {},
+      {
+        $set: {
+          slides: req.validated.body.slides.map((slide, index) => ({
+            ...slide,
+            ctaLabel: slide.ctaLabel || 'Top Up Now',
+            sortOrder: slide.sortOrder || index + 1
+          }))
+        }
+      },
+      { upsert: true, new: true }
+    );
+    clearCache('public:');
+    res.json({ slides: settings.slides || [] });
   })
 );
 

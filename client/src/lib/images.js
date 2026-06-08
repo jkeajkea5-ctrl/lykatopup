@@ -6,7 +6,7 @@ export const imageOverrides = {
   'free-fire': '/game-banners/freefire.jpg',
   'honor-of-kings': '/game-banners/honor-of-kings.jpg',
   'magic-chess-go-go': '/game-banners/magic-chess-go-go.jpg',
-  'valorant-cambodia': '/game-banners/valorant-cambodia.svg',
+  'valorant-cambodia': '/game-banners/valorant-cambodia.png',
   'blood-strike': '/game-banners/blood-strike.jpg',
   'genshin-impact-cambodia': '/game-banners/genshin-impact-cambodia.jpg',
   'honkai-star-rail': '/game-banners/honkai-star-rail.jpg',
@@ -20,6 +20,8 @@ export const imageOverrides = {
   'farlight-84': '/game-banners/farlight-84.jpg',
   zepeto: '/game-banners/zepeto.jpg'
 };
+
+const logoImageSlugs = new Set(['valorant-cambodia']);
 
 export function hideBrokenImage(event) {
   event.currentTarget.style.display = 'none';
@@ -35,6 +37,10 @@ export function displayImageUrl(game) {
   return imageOverrides[game?.slug] || usableImageUrl(game?.imageUrl);
 }
 
+export function imageFrameClass(game) {
+  return logoImageSlugs.has(game?.slug) ? ' logoImageFrame' : '';
+}
+
 export function sortGames(games = []) {
   return [...games].sort((left, right) => {
     const leftIndex = gamePriority.indexOf(left.slug);
@@ -45,4 +51,3 @@ export function sortGames(games = []) {
     return Number(left.sortOrder || 0) - Number(right.sortOrder || 0) || left.name.localeCompare(right.name);
   });
 }
-

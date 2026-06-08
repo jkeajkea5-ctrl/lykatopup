@@ -5,7 +5,7 @@ import { Gamepad2, LogOut, MessageCircle, Moon, Search, Send, ShoppingBag, Sun, 
 const navItems = [
   { to: '/', label: 'Home', icon: Gamepad2, end: true },
   { to: '/catalog', label: 'Catalog', icon: Search },
-  { to: '/contact', label: 'Contact Us', icon: ShoppingBag },
+  { to: '/orders', label: 'Orders', icon: ShoppingBag },
   { to: '/profile', label: 'Profile', icon: UserRound }
 ];
 

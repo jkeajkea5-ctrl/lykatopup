@@ -50,7 +50,7 @@ const g2bulkCallbackSchema = z.object({
 });
 
 function orderNoFromRemark(remark) {
-  const match = String(remark || '').match(/\bFU[A-Z0-9]+\b/);
+  const match = String(remark || '').match(/\bLY[A-Z0-9]+\b/);
   return match?.[0];
 }
 
