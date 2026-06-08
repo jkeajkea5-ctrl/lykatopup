@@ -190,7 +190,7 @@ export function GameDetail() {
   }, [state.packages]);
   const visiblePackages = useMemo(() => state.packages.filter((pkg) => (pkg.packageCategory || 'item-package') === packageType), [packageType, state.packages]);
   const fieldsComplete = fields.every((field) => !field.required || accountInfo[field.key]);
-  const canSubmit = selected && agreed && fieldsComplete;
+  const canSubmit = selected && agreed && fieldsComplete && username?.found;
 
   async function checkUsername() {
     setBusy('check');
@@ -260,7 +260,10 @@ export function GameDetail() {
                 <span>{field.label}</span>
                 <input
                   value={accountInfo[field.key] || ''}
-                  onChange={(event) => setAccountInfo((current) => ({ ...current, [field.key]: event.target.value }))}
+                  onChange={(event) => {
+                    setUsername(null);
+                    setAccountInfo((current) => ({ ...current, [field.key]: event.target.value }));
+                  }}
                   placeholder={field.placeholder || field.label}
                 />
               </label>
@@ -360,7 +363,7 @@ export function GameDetail() {
             <em>{money(selected.priceUsd)}</em>
           </div>
           <button className="primary" disabled={!canSubmit || busy === 'order'} onClick={createOrder} type="button">
-            {busy === 'order' ? <Loader2 className="spin" size={18} /> : <Zap size={18} />} Process Payment -&gt;
+            {busy === 'order' ? <Loader2 className="spin" size={18} /> : <Zap size={18} />} {username?.found ? 'Process Payment ->' : 'Verify ID First'}
           </button>
         </div>
       )}
@@ -515,20 +518,16 @@ function PaymentPanel({ result, onClose }) {
             </div>
           </div>
         )}
-        <div className={`checkoutActions ${isPaid ? 'invoiceActions' : ''}`}>
-          {isPaid ? (
+        {isPaid && (
+          <div className="checkoutActions invoiceActions">
             <>
               <StatusLine text={invoiceDisplayStatus} icon={<BadgeCheck />} tone="good" />
               <button className="primary" onClick={() => navigate('/catalog')} type="button">
                 <Gamepad2 size={18} /> More TopUp
               </button>
             </>
-          ) : (
-            <button className="primary" disabled={checking} onClick={() => checkPayment()} type="button">
-              {checking ? <Loader2 className="spin" size={18} /> : <CreditCard size={18} />} Check payment
-            </button>
-          )}
-        </div>
+          </div>
+        )}
       </section>
     </div>
   );
