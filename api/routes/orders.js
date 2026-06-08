@@ -10,6 +10,7 @@ import { optionalAuth, requireAdmin, requireAuth } from '../middleware/auth.js';
 import { checkGameUsername } from '../services/gameUsername.js';
 import { createKhqrPayment } from '../services/tola.js';
 import { refreshDeliveryStatus } from '../services/delivery.js';
+import { deleteExpiredUnpaidOrders } from '../services/orderCleanup.js';
 import { formatOrder, notifyAdmin, notifyBuyer, notifySystem } from '../services/telegram.js';
 import { packageAvailabilityFilter } from '../utils/packageRules.js';
 
@@ -105,6 +106,7 @@ router.get(
   requireAuth,
   asyncHandler(async (req, res) => {
     if (req.auth.role !== 'buyer') return res.status(403).json({ message: 'Buyer account required' });
+    await deleteExpiredUnpaidOrders();
     const orders = await Order.find({ user: req.auth.sub }).populate('payment').sort({ createdAt: -1 }).limit(100);
     await refreshVisibleDeliveryStatuses(orders);
     res.json(orders);
@@ -114,6 +116,7 @@ router.get(
 router.get(
   '/status/:orderNo',
   asyncHandler(async (req, res) => {
+    await deleteExpiredUnpaidOrders();
     const order = await Order.findOne({ orderNo: req.params.orderNo }).populate('payment').populate('game').populate('package');
     if (!order) return res.status(404).json({ message: 'Order not found' });
     await refreshVisibleDeliveryStatuses([order]);
@@ -125,6 +128,7 @@ router.get(
   '/',
   requireAdmin,
   asyncHandler(async (_req, res) => {
+    await deleteExpiredUnpaidOrders();
     const orders = await Order.find().populate('payment').sort({ createdAt: -1 }).limit(200);
     await refreshVisibleDeliveryStatuses(orders);
     res.json(orders);

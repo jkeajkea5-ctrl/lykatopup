@@ -726,6 +726,14 @@ main {
   margin-top: 26px;
 }
 
+@supports (content-visibility: auto) {
+  .storeSection,
+  .gameGrid {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 520px;
+  }
+}
+
 .compactSectionHead {
   display: flex;
   align-items: center;

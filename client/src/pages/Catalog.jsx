@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useDeferredValue, useMemo } from 'react';
 import { ArrowDownUp, Crosshair, Flame, Gamepad2, Joystick, Puzzle, Search, Shield, ShieldCheck, Sparkles, Star, Swords, UsersRound, WandSparkles } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StatusLine } from '../components/StatusLine.jsx';
@@ -35,6 +35,7 @@ export function Catalog({ games, loading, error }) {
   const categoryParam = searchParams.get('category') || 'All';
   const category = categories.includes(categoryParam) ? categoryParam : 'All';
   const query = searchParams.get('q') || '';
+  const deferredQuery = useDeferredValue(query);
   const sort = sortOptions.some((option) => option.value === searchParams.get('sort')) ? searchParams.get('sort') : 'popular';
   const activeSort = sortOptions.find((option) => option.value === sort) || sortOptions[0];
 
@@ -57,7 +58,7 @@ export function Catalog({ games, loading, error }) {
   }
 
   const filtered = useMemo(() => {
-    const text = query.trim().toLowerCase();
+    const text = deferredQuery.trim().toLowerCase();
     const results = games.filter((game) => {
       const matchesCategory = category === 'All' || game.category === category;
       const searchable = [
@@ -90,7 +91,7 @@ export function Catalog({ games, loading, error }) {
       }
       return 0;
     });
-  }, [category, games, query, sort]);
+  }, [category, deferredQuery, games, sort]);
 
   return (
     <main className="catalogPage">
@@ -124,7 +125,7 @@ export function Catalog({ games, loading, error }) {
         {filtered.map((game, index) => (
           <button className="gameCard" key={game._id || game.slug} onClick={() => navigate(`/games/${game.slug}`)} type="button">
             <span className={`gameImage${imageFrameClass(game)}`}>
-              {displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" onError={hideBrokenImage} /> : <Gamepad2 />}
+              {displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" loading="lazy" decoding="async" onError={hideBrokenImage} /> : <Gamepad2 />}
               <em>{index === 0 ? 'HOT' : index === 1 ? 'NEW' : 'TOP'}</em>
               <i><Star size={13} /> {(4.9 - Math.min(index, 4) * 0.1).toFixed(1)}</i>
             </span>

@@ -238,7 +238,7 @@ export function GameDetail() {
       </button>
       <section className="detailHero" style={{ '--game-bg': `url("${displayImageUrl(state.game)}")` }}>
         <div className="detailHeroCard">
-          <span className={imageFrameClass(state.game).trim()}>{displayImageUrl(state.game) ? <img src={displayImageUrl(state.game)} alt="" onError={hideBrokenImage} /> : <Gamepad2 />}</span>
+          <span className={imageFrameClass(state.game).trim()}>{displayImageUrl(state.game) ? <img src={displayImageUrl(state.game)} alt="" decoding="async" onError={hideBrokenImage} /> : <Gamepad2 />}</span>
           <div>
             <h1>{state.game.name}</h1>
             <p>{state.game.currencyLabel || 'Credits'} | {state.game.category || 'Game'} | Instant delivery</p>
@@ -512,7 +512,7 @@ function PaymentPanel({ result, onClose }) {
               </div>
               <div className="khqrDivider" />
               <div className="qrBox">
-                {payment.qrImageUrl ? <img src={payment.qrImageUrl} alt="KHQR code" /> : payment.qrDataUrl ? <img src={payment.qrDataUrl} alt="KHQR code" /> : <span>{payment.qrText}</span>}
+                {payment.qrImageUrl ? <img src={payment.qrImageUrl} alt="KHQR code" decoding="async" /> : payment.qrDataUrl ? <img src={payment.qrDataUrl} alt="KHQR code" decoding="async" /> : <span>{payment.qrText}</span>}
                 <i aria-hidden="true">$</i>
               </div>
             </div>

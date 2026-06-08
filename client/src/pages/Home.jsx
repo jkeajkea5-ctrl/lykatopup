@@ -100,7 +100,7 @@ export function Home({ games, storefront, loading, error }) {
           type="button"
         >
           {currentSlide?.image ? (
-            <img src={currentSlide.image} alt="" onError={hideBrokenImage} />
+            <img src={currentSlide.image} alt="" fetchPriority="high" decoding="async" onError={hideBrokenImage} />
           ) : (
             <Gamepad2 size={46} />
           )}
@@ -146,7 +146,7 @@ export function Home({ games, storefront, loading, error }) {
           {featured.map((game, index) => (
             <button className="featuredCard" key={`home-${game._id || game.slug}`} onClick={() => navigate(`/games/${game.slug}`)} type="button">
               <span className={`featuredImage${imageFrameClass(game)}`}>
-                {displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" onError={hideBrokenImage} /> : <Gamepad2 />}
+                {displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" loading="lazy" decoding="async" onError={hideBrokenImage} /> : <Gamepad2 />}
                 <em>{index === 0 ? 'HOT' : index === 1 ? 'NEW' : 'TOP'}</em>
               </span>
               <span>
@@ -167,7 +167,7 @@ export function Home({ games, storefront, loading, error }) {
         <div className="popularGrid">
           {popular.map((game, index) => (
             <button className="popularCard" key={`popular-${game._id || game.slug}`} onClick={() => navigate(`/games/${game.slug}`)} type="button">
-              <span className={`popularImage${imageFrameClass(game)}`}>{displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" onError={hideBrokenImage} /> : <Gamepad2 />}</span>
+              <span className={`popularImage${imageFrameClass(game)}`}>{displayImageUrl(game) ? <img src={displayImageUrl(game)} alt="" loading="lazy" decoding="async" onError={hideBrokenImage} /> : <Gamepad2 />}</span>
               <span>
                 <strong>{game.shortName || game.name}</strong>
                 <small>{game.category || 'Game'}</small>

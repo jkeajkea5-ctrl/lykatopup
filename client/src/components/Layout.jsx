@@ -50,7 +50,7 @@ export function Layout({ auth, setAuth }) {
       <header className="topbar">
         <div className="brand" aria-label="Lyka Topup">
           <span className="brandLogo">
-            <img src="/lyka-logo.png" alt="" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+            <img src="/lyka-logo.png" alt="" decoding="async" onError={(event) => { event.currentTarget.style.display = 'none'; }} />
             <span className="brandMark">L</span>
           </span>
           <span>

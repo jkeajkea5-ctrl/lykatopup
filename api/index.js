@@ -14,6 +14,7 @@ import packageRoutes from './routes/packages.js';
 import orderRoutes from './routes/orders.js';
 import paymentRoutes from './routes/payments.js';
 import deliveryRoutes from './routes/delivery.js';
+import cronRoutes from './routes/cron.js';
 import adminRoutes from './routes/admin.js';
 import settingsRoutes from './routes/settings.js';
 import storefrontRoutes from './routes/storefront.js';
@@ -51,6 +52,7 @@ app.use('/api/storefront', requireDatabase, storefrontRoutes);
 app.use('/api/orders', requireDatabase, orderRoutes);
 app.use('/api/payments', requireDatabase, paymentRoutes);
 app.use('/api/delivery', requireDatabase, deliveryRoutes);
+app.use('/api/cron', requireDatabase, cronRoutes);
 app.use('/api/admin', requireDatabase, adminRoutes);
 app.use('/api/settings', requireDatabase, settingsRoutes);
 

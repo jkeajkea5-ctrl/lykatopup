@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout.jsx';
 import { LoadingView } from './components/LoadingView.jsx';
 import { useBootstrap } from './hooks/useBootstrap.js';
-import { Admin } from './pages/Admin.jsx';
-import { AdminLogin } from './pages/AdminLogin.jsx';
-import { Catalog } from './pages/Catalog.jsx';
-import { ContactUs } from './pages/ContactUs.jsx';
-import { GameDetail } from './pages/GameDetail.jsx';
 import { Home } from './pages/Home.jsx';
-import { Profile } from './pages/Profile.jsx';
+
+const Admin = lazy(() => import('./pages/Admin.jsx').then((module) => ({ default: module.Admin })));
+const AdminLogin = lazy(() => import('./pages/AdminLogin.jsx').then((module) => ({ default: module.AdminLogin })));
+const Catalog = lazy(() => import('./pages/Catalog.jsx').then((module) => ({ default: module.Catalog })));
+const ContactUs = lazy(() => import('./pages/ContactUs.jsx').then((module) => ({ default: module.ContactUs })));
+const GameDetail = lazy(() => import('./pages/GameDetail.jsx').then((module) => ({ default: module.GameDetail })));
+const Profile = lazy(() => import('./pages/Profile.jsx').then((module) => ({ default: module.Profile })));
 
 export function App() {
   const bootstrap = useBootstrap();
@@ -26,18 +27,20 @@ export function App() {
   }
 
   return (
-    <Routes>
-      <Route element={<Layout auth={auth} setAuth={setAuth} />}>
-        <Route index element={<Home {...bootstrap} />} />
-        <Route path="catalog" element={<Catalog {...bootstrap} />} />
-        <Route path="orders" element={<ContactUs auth={auth} />} />
-        <Route path="contact" element={<ContactUs auth={auth} />} />
-        <Route path="profile" element={<Profile setAuth={setAuth} />} />
-        <Route path="games/:slug" element={<GameDetail />} />
-        <Route path="admin" element={<Admin auth={auth} />} />
-        <Route path="admin/login" element={<AdminLogin setAuth={setAuth} />} />
-        <Route path="*" element={<Navigate replace to="/" />} />
-      </Route>
-    </Routes>
+    <Suspense fallback={<LoadingView title="Loading Page" subtitle="Opening the next screen..." />}>
+      <Routes>
+        <Route element={<Layout auth={auth} setAuth={setAuth} />}>
+          <Route index element={<Home {...bootstrap} />} />
+          <Route path="catalog" element={<Catalog {...bootstrap} />} />
+          <Route path="orders" element={<ContactUs auth={auth} />} />
+          <Route path="contact" element={<ContactUs auth={auth} />} />
+          <Route path="profile" element={<Profile setAuth={setAuth} />} />
+          <Route path="games/:slug" element={<GameDetail />} />
+          <Route path="admin" element={<Admin auth={auth} />} />
+          <Route path="admin/login" element={<AdminLogin setAuth={setAuth} />} />
+          <Route path="*" element={<Navigate replace to="/" />} />
+        </Route>
+      </Routes>
+    </Suspense>
   );
 }

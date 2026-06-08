@@ -6,7 +6,7 @@ export function LoadingView({ title = 'Loading Lyka Topup', subtitle = 'Preparin
       <section className="loadingPanel">
         <div className="loadingBrand">
           <span className="loadingLogo">
-            <img src="/lyka-logo.png" alt="" />
+            <img src="/lyka-logo.png" alt="" decoding="async" />
           </span>
           <span>
             <strong>{title}</strong>
