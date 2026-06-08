@@ -1,0 +1,21 @@
+node_modules
+dist
+.vercel
+.env
+.env.*
+!.env.example
+npm-debug.log*
+dev-server*.log
+coverage
+test-results
+video-frames
+*.log
+*.err.log
+
+.vercel
+
+UX Pilot - Superfast UX_UI Design with AI.html
+UX Pilot - Superfast UX_UI Design with AI_files/
+*-local-new.png
+ux-*.png
+temp_*.html

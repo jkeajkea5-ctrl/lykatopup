@@ -1,0 +1,16 @@
+DirectoryIndex client/dist/index.html index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /FinchUP/
+
+  RewriteRule ^api/(.*)$ http://localhost:5000/api/$1 [P,L]
+
+  RewriteRule ^assets/(.*)$ client/dist/assets/$1 [L]
+  RewriteRule ^item-icons/(.*)$ client/dist/item-icons/$1 [L]
+  RewriteRule ^(finchup-logo-generated\.png|finchup-logo\.svg|khqr-logo\.svg|logo\.png|og-image\.png|robots\.txt|sitemap\.xml)$ client/dist/$1 [L]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . client/dist/index.html [L]
+</IfModule>

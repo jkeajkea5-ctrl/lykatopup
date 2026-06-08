@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body { margin: 0; background: #111; color: white; font-family: Arial, sans-serif; }
+      #grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 12px; }
+      figure { margin: 0; background: #222; padding: 8px; border-radius: 8px; }
+      canvas { width: 100%; display: block; background: #000; }
+      figcaption { font-size: 14px; padding-top: 6px; }
+    </style>
+  </head>
+  <body>
+    <video id="video" muted playsinline crossorigin="anonymous"></video>
+    <div id="grid"></div>
+    <script>
+      const src = new URLSearchParams(location.search).get('src');
+      const video = document.getElementById('video');
+      const grid = document.getElementById('grid');
+      video.src = src;
+
+      function wait(event) {
+        return new Promise((resolve) => video.addEventListener(event, resolve, { once: true }));
+      }
+
+      async function seek(time) {
+        video.currentTime = time;
+        await wait('seeked');
+      }
+
+      async function run() {
+        await wait('loadedmetadata');
+        const duration = video.duration || 121;
+        const times = Array.from({ length: 18 }, (_, index) => Math.min(duration - 0.5, index * duration / 18 + 1));
+        for (const time of times) {
+          await seek(time);
+          const figure = document.createElement('figure');
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          canvas.getContext('2d').drawImage(video, 0, 0);
+          const caption = document.createElement('figcaption');
+          caption.textContent = `${Math.round(time)}s`;
+          figure.append(canvas, caption);
+          grid.append(figure);
+        }
+        document.body.dataset.ready = 'true';
+      }
+
+      run().catch((error) => {
+        document.body.textContent = error.stack || error.message;
+      });
+    </script>
+  </body>
+</html>

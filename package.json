@@ -1,0 +1,46 @@
+{
+  "name": "lyka-topup",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:client\"",
+    "dev:client": "vite --config client/vite.config.js --host 0.0.0.0",
+    "dev:api": "nodemon api/index.js",
+    "build": "vite build --config client/vite.config.js",
+    "build:xampp": "vite build --config client/vite.config.js --base=/LykaTopup/",
+    "preview": "vite preview --config client/vite.config.js --host 0.0.0.0",
+    "start": "node api/index.js",
+    "sync:g2bulk-packages": "node tools/sync-g2bulk-packages.js",
+    "poll:g2bulk-deliveries": "node tools/poll-g2bulk-deliveries.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "@vitejs/plugin-react": "^4.5.0",
+    "axios": "^1.9.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "google-auth-library": "^10.6.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.511.0",
+    "mongoose": "^8.15.1",
+    "morgan": "^1.10.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-helmet-async": "^3.0.0",
+    "react-router-dom": "^7.6.1",
+    "vite": "^6.3.5",
+    "zod": "^3.25.36"
+  },
+  "devDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
+    "concurrently": "^9.1.2",
+    "nodemon": "^3.1.10"
+  }
+}

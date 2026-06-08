@@ -1,0 +1,12 @@
+docs/
+test-results/
+video-frames/
+*.log
+*.err.log
+tmp-admin-games.png
+uxpilot-live-page.png
+video-contact-sheet.png
+temp_*.html
+zadstore.html
+UX Pilot - Superfast UX_UI Design with AI.html
+UX Pilot - Superfast UX_UI Design with AI_files/
