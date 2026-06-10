@@ -113,6 +113,14 @@ Set `CRON_SECRET` in production and call cron endpoints with `Authorization: Bea
 
 This repo includes `.github/workflows/poll-fulfillment.yml` for automatic 5-minute polling through GitHub Actions. To enable it, add a GitHub Actions repository secret named `CRON_SECRET` with the same value configured in Vercel. The workflow calls both `/api/cron/poll-payments` and `/api/cron/poll-deliveries`.
 
+For faster external polling on an always-on server such as B2K, run:
+
+```bash
+npm run poll:fulfillment-loop
+```
+
+Set `FULFILLMENT_POLL_BASE_URL=https://lykatopup.store`, `CRON_SECRET`, `FULFILLMENT_DELIVERY_POLL_SECONDS=5`, and `FULFILLMENT_PAYMENT_POLL_SECONDS=30`. This polls G2Bulk delivery every 5 seconds and payment fallback every 30 seconds. Vercel Hobby and GitHub Actions cannot run every 5 seconds.
+
 ## Game Username APIs
 
 Each game stores `requiredFields` and optional `usernameApi` settings. Use templates like `{{userId}}` and `{{serverId}}` in URL, headers, or request body fields. Checkout is blocked unless the username check returns a username.
