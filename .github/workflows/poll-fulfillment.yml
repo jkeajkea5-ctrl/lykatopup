@@ -1,0 +1,35 @@
+name: Poll fulfillment
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: poll-fulfillment
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Poll payment status
+        run: |
+          curl --fail --show-error --silent \
+            --connect-timeout 10 \
+            --max-time 60 \
+            --retry 2 \
+            --retry-delay 5 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://lykatopup.store/api/cron/poll-payments?limit=50"
+
+      - name: Poll G2Bulk deliveries
+        run: |
+          curl --fail --show-error --silent \
+            --connect-timeout 10 \
+            --max-time 60 \
+            --retry 2 \
+            --retry-delay 5 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://lykatopup.store/api/cron/poll-deliveries"

@@ -102,6 +102,17 @@ If Tola uses different endpoint paths, update only `TOLA_AUTH_PATH`, `TOLA_KHQR_
 TOLA_MOCK=true
 ```
 
+Payment status is checked in two ways:
+
+- KHQR Link can call the webhook endpoint `/api/webhooks/khqr`. Set the portal Webhook URL to `https://your-domain.com/api/webhooks/khqr`, copy the portal webhook secret into `KHQR_LINK_WEBHOOK_SECRET`, and enable webhook delivery. Webhook requests are verified with `X-KHQR-Signature`, then the backend confirms the payment with KHQR Link before marking the order paid.
+- The checkout popup polls `/api/payments/:paymentId/check` while the buyer keeps the page open.
+- The scheduled cron endpoint `/api/cron/poll-payments` checks pending payments and can confirm orders even if the buyer pays from a screenshot and never returns to the website.
+- On long-running Node servers, the built-in payment polling worker runs automatically after MongoDB connects. Configure it with `PAYMENT_POLL_WORKER_ENABLED`, `PAYMENT_POLL_INTERVAL_SECONDS`, `PAYMENT_POLL_LIMIT`, and `PAYMENT_POLL_MAX_AGE_MINUTES`.
+
+Set `CRON_SECRET` in production and call cron endpoints with `Authorization: Bearer <CRON_SECRET>`. `vercel.json` schedules payment polling daily to support Vercel Hobby limits; for faster confirmation on Vercel, call the same endpoint from an external scheduler more frequently or upgrade to a plan that supports frequent Cron Jobs.
+
+This repo includes `.github/workflows/poll-fulfillment.yml` for automatic 5-minute polling through GitHub Actions. To enable it, add a GitHub Actions repository secret named `CRON_SECRET` with the same value configured in Vercel. The workflow calls both `/api/cron/poll-payments` and `/api/cron/poll-deliveries`.
+
 ## Game Username APIs
 
 Each game stores `requiredFields` and optional `usernameApi` settings. Use templates like `{{userId}}` and `{{serverId}}` in URL, headers, or request body fields. Checkout is blocked unless the username check returns a username.

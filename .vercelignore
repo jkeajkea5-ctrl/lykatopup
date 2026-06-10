@@ -3,6 +3,9 @@ test-results/
 video-frames/
 *.log
 *.err.log
+khqr-webhook-secret.txt
+g2bulk-callback-secret.txt
+cron-secret.txt
 tmp-admin-games.png
 uxpilot-live-page.png
 video-contact-sheet.png
