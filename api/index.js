@@ -4,20 +4,23 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import { connectDatabase } from './config/db.js';
-import { ensureDefaultAdmin } from './services/bootstrap.js';
-import { sanitizeMongoOperators } from './middleware/sanitize.js';
-import { requireDatabase } from './middleware/database.js';
-import authRoutes from './routes/auth.js';
-import gameRoutes from './routes/games.js';
-import packageRoutes from './routes/packages.js';
-import orderRoutes from './routes/orders.js';
-import paymentRoutes from './routes/payments.js';
-import deliveryRoutes from './routes/delivery.js';
-import cronRoutes from './routes/cron.js';
-import adminRoutes from './routes/admin.js';
-import settingsRoutes from './routes/settings.js';
-import storefrontRoutes from './routes/storefront.js';
+import { connectDatabase } from '../server/config/db.js';
+import { ensureDefaultAdmin } from '../server/services/bootstrap.js';
+import { startPaymentPollingWorker } from '../server/services/paymentPollingWorker.js';
+import { antiBot } from '../server/middleware/antiBot.js';
+import { sanitizeMongoOperators } from '../server/middleware/sanitize.js';
+import { requireDatabase } from '../server/middleware/database.js';
+import authRoutes from '../server/routes/auth.js';
+import gameRoutes from '../server/routes/games.js';
+import packageRoutes from '../server/routes/packages.js';
+import orderRoutes from '../server/routes/orders.js';
+import paymentRoutes from '../server/routes/payments.js';
+import deliveryRoutes from '../server/routes/delivery.js';
+import webhookRoutes from '../server/routes/webhooks.js';
+import cronRoutes from '../server/routes/cron.js';
+import adminRoutes from '../server/routes/admin.js';
+import settingsRoutes from '../server/routes/settings.js';
+import storefrontRoutes from '../server/routes/storefront.js';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -34,12 +37,31 @@ app.use(helmet({
   }
 }));
 app.use(cors({ origin: clientOrigins.length ? clientOrigins : true, credentials: true }));
-app.use(express.json({ limit: '8mb' }));
+app.use(express.json({
+  limit: '8mb',
+  verify: (req, _res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
+app.use('/api/webhooks', requireDatabase, webhookRoutes);
+app.use(antiBot);
 app.use(sanitizeMongoOperators);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 400 }));
-app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 60 }));
-app.use('/api/payments', rateLimit({ windowMs: 60 * 1000, limit: 80 }));
+app.use('/api', rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
+app.use('/api/auth', rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false }));
+app.use('/api/games/:slug/check-username', rateLimit({ windowMs: 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false }));
+app.use('/api/orders/status', rateLimit({ windowMs: 10 * 60 * 1000, limit: 60, standardHeaders: true, legacyHeaders: false }));
+app.use(
+  '/api/orders',
+  rateLimit({
+    windowMs: 10 * 60 * 1000,
+    limit: 12,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === 'GET' && req.path.startsWith('/status/')
+  })
+);
+app.use('/api/payments', rateLimit({ windowMs: 60 * 1000, limit: 40, standardHeaders: true, legacyHeaders: false }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, name: 'Lyka Topup API' });
@@ -68,6 +90,7 @@ app.use((err, _req, res, _next) => {
 if (process.env.MONGODB_URI) {
   connectDatabase()
     .then(ensureDefaultAdmin)
+    .then(startPaymentPollingWorker)
     .catch((error) => {
       console.error('Database startup failed', error);
     });
